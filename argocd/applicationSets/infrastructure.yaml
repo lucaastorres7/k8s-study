@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  # Generator: Varre o repositório e gera um item para cada diretório encontrado
+  generators:
+    - git:
+        repoURL: https://github.com/lucaastorres7/k8s-study
+        revision: HEAD
+        directories:
+          # Gera um App pra cada subdiretório dentro de infrastructure
+          - path: "infrastructure/*"
+
+  # Permite o uso de templates (.path.basename e etc)
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+
+  # Define como cada App vai ser
+  template:
+    metadata:
+      # Nome da App = prefix + nome do diretório 
+      name: "infrastructure-{{ .path.basename }}"
+    spec:
+      # AppProject que vai ser usado
+      project: "infrastructure"
+      sources:
+        - repoURL: https://github.com/lucaastorres7/k8s-study
+          targetRevision: HEAD
+          path: "{{ .path.path }}" # Caminho completo do diretório
+          directory:
+            # Aplica em TODOS os subdiretórios também
+            recurse: true
+      destination:
+        # Cluster de destino
+        name: "kind-in-cluster"
+      syncPolicy:
+        automated:
+          prune: true        # Remove recursos que não estão no Git
+          selfHeal: false    # Não tenta corrigir divergências automaticamente
+          allowEmpty: true   # Não marca como falha se o diretório estiver vazio
+        syncOptions:
+          - CreateNamespace=true # Cria o namespace automaticamente se não existir
+          - PruneLast=true       # Só deleta os recursos depois de criar tudo

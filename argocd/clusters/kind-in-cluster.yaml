@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kind-in-cluster
+  namespace: argocd
+  labels:
+    # Faz o ArgoCD reconhecer esse Secret como um cluster
+    argocd.argoproj.io/secret-type: cluster
+  annotations:
+    # Indica que esse Secret é gerenciado pelo ArgoCD
+    managed-by: argocd.argoproj.io
+type: Opaque
+stringData:
+  # Nome do cluster
+  name: kind-in-cluster
+  # URL da API do cluster
+  server: https://kubernetes.default.svc
+  # Configs extras
+  config: |
+    { "tlsClientConfig": { "insecure": false } }
