@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd
+  namespace: argocd
+  finalizers:
+    # Impede deletar o projeto enquanto ainda existir Applications nele
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Projeto para gerenciar o próprio ArgoCD"
+
+  # Quais repos as Applications podem usar como source
+  sourceRepos:
+    - "https://github.com/lucaastorres7/k8s-study"
+  
+  # Quais clusters e namespaces as Applications podem ser deployadas
+  destinations:
+    - namespace: "*"
+      name: "*"
+  
+  # Recursos cluster-scoped que podem ser criados
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  
+  # Recursos namespace-scoped que podem ser criados
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
